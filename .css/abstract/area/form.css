@@ -1,0 +1,21 @@
+.area_form {
+    font-size: 20px;
+    width: 34%;
+    margin-left: 33%;
+    margin-right: 33%;
+    padding-top: 20px;
+}
+
+.area_form#marginless {
+    padding-top: 0;
+}
+
+.area_form#full {
+    width: 90%;
+    margin-left: 5%;
+    margin-right: 5%;
+}
+
+.area_form a.button {
+    width: calc(100% - 40px);
+}

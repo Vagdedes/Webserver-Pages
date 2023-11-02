@@ -1,0 +1,74 @@
+html, body, h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    font-family: Verdana, sans-serif;
+    background-size: 100%;
+    background-color: #161616;
+    font-weight: normal;
+    font-size: 18px;
+}
+
+/*::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+    opacity: 0.0;
+}*/
+
+form {
+    margin: 0;
+    padding: 0;
+}
+
+input,
+textarea,
+select {
+    width: calc(100% - 40px);
+    max-width: calc(100% - 40px);
+    min-width: calc(100% - 40px);
+    padding: 20px;
+    font-size: 18px;
+    margin-bottom: 8px;
+    display: inline-block;
+    border: none;
+    background-color: #424242;
+    color: #bdbdbd;
+    border-radius: 5px;
+
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+input[type=text],
+input[type=password],
+textarea,
+select {
+    -border: 1px solid #eeeeee;
+}
+
+table,
+tr,
+td {
+    width: 100%;
+    font-size: 18px;
+    display: inline-block;
+    border: none;
+    background-color: #424242;
+    color: #bdbdbd;
+}
+
+ul,
+ol {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.recaptcha {
+    text-align: center;
+}
+
+.g-recaptcha {
+    display: inline-block;
+}

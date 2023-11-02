@@ -40,5 +40,5 @@ bin/
 obj/
 
 # Custom
-.png
-.jpg
+*.png
+*.jpg

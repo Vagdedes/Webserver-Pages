@@ -1,0 +1,3 @@
+.area_list#legal ul li {
+	width: calc(33.33333333% - 10px);
+}

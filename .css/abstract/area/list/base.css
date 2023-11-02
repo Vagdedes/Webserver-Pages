@@ -1,0 +1,63 @@
+@import url("https://www.vagdedes.com/.css/abstract/area/list/text.css");
+@import url("https://www.vagdedes.com/.css/abstract/area/list/legal.css");
+@import url("https://www.vagdedes.com/.css/abstract/area/list/product.css");
+@import url("https://www.vagdedes.com/.css/abstract/area/list/single.css");
+@import url("https://www.vagdedes.com/.css/abstract/area/list/board.css");
+
+.area_list {
+    font-size: 18px;
+    padding: 5px;
+    width: 80%;
+    margin-left: calc(10% - 5px);
+	margin-right: calc(10% - 5px);
+    margin-top: 25px;
+	overflow: hidden;
+    border-radius: 5px;
+}
+
+.area_list .button {
+    color: white;
+    border-radius: 0;
+    width: 50%;
+    padding: 10px 0;
+    float: left;
+    margin-bottom: 10px;
+}
+
+.area_list ul li {
+    height: 200px;
+    overflow: auto;
+    width: calc(50% - 10px);
+    float: left;
+    margin: 5px;
+    color: #bdbdbd;
+	border-radius: 5px;
+    -box-shadow: 2px 2px 8px #999;
+    transition: transform 0.33s;
+    background-color: #272727;
+}
+
+.area_list ul li:hover {
+    transform: scale(1.015);
+}
+
+.area_list_title {
+    width: 100%;
+    text-align: center;
+    background-color: #292929;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.area_list_contents {
+    padding: 15px;
+    text-align: left;
+}
+
+.area_list_contents_title {
+    text-transform: capitalize;
+}
+
+.area_list_contents_box {
+    color: #9e9e9e;
+}

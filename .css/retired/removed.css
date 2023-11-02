@@ -1,0 +1,18 @@
+.disclaimer {
+    font-size: 16px;
+    color: #b71c1c;
+}
+
+.notification {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 18px;
+    color: black;
+    background-color: #fdd835;
+    text-align: center;
+}
+
+.notification a {
+    text-decoration: underline;
+    color: black;
+}
