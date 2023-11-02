@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <?php
-    require_once '/var/www/.structure/library/base/utilities.php';
+    require '/var/www/.structure/library/base/utilities.php';
     ini_set('user_agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36');
     $title = "Anti Cheat List (Bukkit & Spigot)";
     $domain = get_domain();
@@ -38,8 +38,8 @@
     <div class="area_list" id="legal">
         <ul>
             <?php
-            require_once '/var/www/.structure/library/base/form.php';
-            require_once '/var/www/.structure/library/base/requirements/sql_connection.php';
+            require '/var/www/.structure/library/base/form.php';
+            require '/var/www/.structure/library/base/requirements/sql_connection.php';
 
             // Separator
             function ceilRating($decimal)
@@ -112,8 +112,8 @@
             $month = get_form_get("month");
             $sales = array();
 
-            require_once '/var/www/.structure/library/base/requirements/sql_connection.php';
-            require_once '/var/www/.structure/library/base/communication.php';
+            require '/var/www/.structure/library/base/requirements/sql_connection.php';
+            require '/var/www/.structure/library/base/communication.php';
             $showSales = is_numeric($year) && is_numeric($month)
                 && $month >= 1 && $month <= 12
                 && is_private_connection();

@@ -1,15 +1,15 @@
 <?php
-require_once '/var/www/.structure/library/base/form.php';
+require '/var/www/.structure/library/base/form.php';
 $month = get_form_get("month");
 $year = get_form_get("year");
 
 if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
-    require_once '/var/www/.structure/library/base/communication.php';
+    require '/var/www/.structure/library/base/communication.php';
 
     if (is_private_connection()) {
-        require_once '/var/www/.structure/library/base/utilities.php';
-        require_once '/var/www/.structure/library/memory/init.php';
-        require_once '/var/www/.structure/library/paypal/init.php';
+        require '/var/www/.structure/library/base/utilities.php';
+        require '/var/www/.structure/library/memory/init.php';
+        require '/var/www/.structure/library/paypal/init.php';
         $table = "personal.expenses";
         $cacheKey = $table . $month . $year;
 

@@ -1,14 +1,14 @@
 <?php
-require_once '/var/www/.structure/library/base/form.php';
+require '/var/www/.structure/library/base/form.php';
 $month = get_form_get("month");
 $year = get_form_get("year");
 
 
 if (is_numeric($month) && is_numeric($year)) {
-    require_once '/var/www/.structure/library/base/communication.php';
+    require '/var/www/.structure/library/base/communication.php';
 
     if (is_private_connection()) {
-        require_once '/var/www/.structure/library/base/requirements/account_systems.php';
+        require '/var/www/.structure/library/base/requirements/account_systems.php';
         $formAmount = get_form_get("amount");
         $ignoreFees = !empty(get_form_get("ignoreFees"));
         $hasAmount = is_numeric($formAmount);
