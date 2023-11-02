@@ -74,10 +74,10 @@
     }
     .product_list ul li {
         margin-bottom: 10px;
-        width: calc(50% - 10px);
-        max-width: calc(50% - 10px);
-        margin-left: 5px;
-        margin-right: 5px;
+        width: calc(50% - 20px);
+        max-width: calc(50% - 20px);
+        margin-left: 10px;
+        margin-right: 10px;
         height: 150px;
         display: block;
     }

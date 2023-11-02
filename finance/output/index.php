@@ -7,7 +7,7 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
     require '/var/www/.structure/library/base/communication.php';
 
     if (is_private_connection()) {
-        require '/var/www/.structure/library/base/utilities.php';
+        require_once '/var/www/.structure/library/base/utilities.php';
         require '/var/www/.structure/library/memory/init.php';
         require '/var/www/.structure/library/paypal/init.php';
         $table = "personal.expenses";
