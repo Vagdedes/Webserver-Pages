@@ -250,6 +250,5 @@
         </ul>
     </div>
 </div>
-<?php include("/var/www/.structure/library/design/accountOld/footer/footer.php"); ?>
 </body>
 </html>
