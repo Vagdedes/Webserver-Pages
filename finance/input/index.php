@@ -271,7 +271,7 @@ if (is_numeric($month) && is_numeric($year)) {
                     $ownerships = get_builtbybit_resource_ownerships(
                         $product->identification[AccountAccounts::BUILTBYBIT_URL],
                     );
-                    $amount = $product->tiers->paid[0]->price;
+                    $amount = array_shift($product->tiers->paid)->price;
                     $beforeTax = $amount - $fee;
                     $tax = cut_decimal($beforeTax - ($beforeTax / $standardTax), 2);
 
