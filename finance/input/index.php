@@ -253,9 +253,8 @@ if (is_numeric($month) && is_numeric($year)) {
         }
 
         // Separator
-        $application = new Application(null);
-        $products = $application->getAccount(0);
-        $products = $products->getProduct()->find(null, false);
+        $account = new Account();
+        $products = $account->getProduct()->find(null, false);
 
         if ($products->isPositiveOutcome()) {
             $receivers = array(

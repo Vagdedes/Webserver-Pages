@@ -9,11 +9,11 @@ $description = "Welcome to my personal website. Here you will find my related pr
     <?php echo get_google_analytics(); ?>
     <title>Evangelos Dedes | Software Developer</title>
     <?php echo "<meta name='description' content='" . $description . "'>"; ?>
-    <?php echo "<link rel='shortcut icon' type='image/png' href='" . Application::IMAGES_PATH . "icon.png'>"; ?>
+    <?php echo "<link rel='shortcut icon' type='image/png' href='" . Account::IMAGES_PATH . "icon.png'>"; ?>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <?php
     $randomNumber = random_number();
-    echo "<link rel='stylesheet' href='" . Application::WEBSITE_DESIGN_PATH . "universal.css?id=$randomNumber>'>";
+    echo "<link rel='stylesheet' href='" . Account::WEBSITE_DESIGN_PATH . "universal.css?id=$randomNumber>'>";
     ?>
 </head>
 <body>
