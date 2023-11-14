@@ -74,12 +74,16 @@
     }
     .product_list ul li {
         margin-bottom: 10px;
-        width: calc(50% - 20px);
-        max-width: calc(50% - 20px);
+        width: calc(50% - 15px);
+        max-width: calc(50% - 15px);
         margin-left: 10px;
         margin-right: 10px;
         height: 150px;
         display: block;
+    }
+    .product_list ul li#left {
+        margin-left: 10px;
+        margin-right: 0;
     }
     .area_list ul li:hover {
         transform: scale(1.0);

@@ -33,7 +33,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
 <div class='area' id='darker'>
     <div class='product_list'>
         <ul>
-            <li>
+            <li id="left">
                 <a href='https://github.com/Vagdedes'>
                     <div class='product_list_contents'
                          style="background-image: url('https://vagdedes.com/.images/github.png');">
@@ -49,7 +49,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
                     </div>
                 </a>
             </li>
-            <li>
+            <li id="left">
                 <a href='https://www.patreon.com/Vagdedes'>
                     <div class='product_list_contents'
                          style="background-image: url('https://vagdedes.com/.images/patreon.png');">
@@ -65,7 +65,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
                     </div>
                 </a>
             </li>
-            <li>
+            <li id="left">
                 <a href='https://vagdedes.com/resume'>
                     <div class='product_list_contents'
                          style="background-image: url('https://vagdedes.com/.images/simple.png');">
