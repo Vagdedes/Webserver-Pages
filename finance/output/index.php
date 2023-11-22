@@ -5,6 +5,7 @@ $year = get_form_get("year");
 
 if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
     require '/var/www/.structure/library/base/communication.php';
+    manage_errors(E_ALL);
 
     if (is_private_connection()) {
         require_once '/var/www/.structure/library/base/utilities.php';
@@ -92,9 +93,12 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
                                         $loopAmount = abs($transaction["L_AMT" . $i]);
 
                                         if (array_key_exists($loopName, $array)) {
-                                            $array[$loopName] += $loopAmount;
+                                            $array[$loopName][1] += $loopAmount;
                                         } else {
-                                            $array[$loopName] = $loopAmount;
+                                            $convertedData = str_replace("T", " ",
+                                                str_replace("Z", "", $transaction["L_TIMESTAMP0"])
+                                            );
+                                            $array[$loopName] = array($convertedData, $loopAmount);
                                         }
                                     } else {
                                         break;
@@ -113,7 +117,7 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
                 set_sql_cache(null, $table);
                 $query = get_sql_query(
                     $table,
-                    null,
+                    array("transaction_name", "transaction_date", "amount"),
                     array(
                         array("month", $month),
                         array("year", $year)
@@ -123,29 +127,31 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
                 if (!empty($query)) {
                     foreach ($query as $object) {
                         $loopName = $object->transaction_name;
-                        $loopAmount = $object->amount;
 
-                        if (array_key_exists($loopName, $array)) {
-                            $array[$loopName] += $loopAmount;
+                        if (array_key_exists($object->transaction_name, $array)) {
+                            $array[$object->transaction_name][1] += $object->amount;
                         } else {
-                            $array[$loopName] = $loopAmount;
+                            $array[$object->transaction_name] = array($object->transaction_date, $object->amount);
                         }
                     }
                 }
                 set_key_value_pair($cacheKey, $array, "10 minutes");
             }
+            manage_errors(E_ALL);
 
             if (!empty($array)) {
                 $total = 0;
 
-                foreach ($array as $loopName => $loopAmount) {
+                foreach ($array as $loopName => $properties) {
+                    $loopAmount = $properties[1];
+
                     if (is_numeric($loopAmount)) {
                         if ($loopAmount != 0) {
-                            echo $loopName . ": " . $loopAmount . "<br>";
+                            echo "<b>" . $properties[0] . "</b> " . $loopName . ": " . $loopAmount . "<br>";
                             $total += $loopAmount;
                         }
                     } else {
-                        echo $loopName . ": " . $loopAmount . "<br>";
+                        echo "<b>" . $properties[0] . "</b>" . $loopName . ": " . $loopAmount . "<br>";
                     }
                 }
                 echo "<b>Total: $total</b>";
