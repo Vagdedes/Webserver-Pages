@@ -6,7 +6,6 @@ if (!empty($id)) {
     require '/var/www/.structure/library/base/communication.php';
 
     if (is_private_connection()) {
-        require '/var/www/.structure/library/base/utilities.php';
         require '/var/www/.structure/library/paypal/init.php';
 
         // Separator
