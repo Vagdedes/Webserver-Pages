@@ -9,9 +9,6 @@ if (is_numeric($month) && is_numeric($year)) {
 
     if (is_private_connection()) {
         require '/var/www/.structure/library/base/requirements/account_systems.php';
-        $formAmount = get_form_get("amount");
-        $ignoreFees = !empty(get_form_get("ignoreFees"));
-        $hasAmount = is_numeric($formAmount);
 
         // Separator
         $standardTax = 1.24;
@@ -32,9 +29,7 @@ if (is_numeric($month) && is_numeric($year)) {
 
         // Separator
         $results = array();
-        $totalAmount = 0;
-        $totalFee = 0;
-        $totalTax = 0;
+        $actual_profit = 0;
 
         // Separator
         $blacklist = get_sql_query(
@@ -60,88 +55,87 @@ if (is_numeric($month) && is_numeric($year)) {
                     }
                 }
                 $date = str_replace("T", " ", str_replace("Z", "", $transaction->ORDERTIME));
-                $fee = 0.0;
-                $hasFees = isset($transaction->FEEAMT);
 
-                if ($date >= $startDate && $date <= $endDate && ($ignoreFees || $hasFees)) {
-                    $fee = $hasFees ? $transaction->FEEAMT : 0.0;
+                if ($date >= $startDate && $date <= $endDate) {
+                    $fee = isset($transaction->FEEAMT) ? abs($transaction->FEEAMT) : 0.0;
+                    $amount = $transaction->AMT;
+                    $beforeTax = $amount - $fee;
+                    $tax = $beforeTax - ($beforeTax / $standardTax);
+                    $currency = $transaction->CURRENCYCODE;
+                    $foundEmail = isset($transaction->RECEIVERBUSINESS);
+                    $receivers = array(
+                        $totalString,
+                        $foundEmail ? "paypal:" . $transaction->RECEIVERBUSINESS : "Unknown"
+                    );
+                    $paypalBusinessEmail = $foundEmail && $transaction->RECEIVERBUSINESS == "VagdedesBilling@gmail.com";
 
-                    if ($ignoreFees || $fee != 0.0) {
-                        $fee = abs($fee);
-                        $amount = $transaction->AMT;
-                        $beforeTax = $amount - $fee;
-                        $tax = cut_decimal($beforeTax - ($beforeTax / $standardTax), 2);
-                        $currency = $transaction->CURRENCYCODE;
-                        $receivers = array(
-                            $totalString,
-                            isset($transaction->RECEIVERBUSINESS) ? "paypal:" . $transaction->RECEIVERBUSINESS : "Unknown"
-                        );
+                    $object = new stdClass();
+                    $object->date = $date;
+                    $object->amount = $beforeTax . " " . $currency;
+                    $object->name = $transaction->FIRSTNAME . " " . $transaction->LASTNAME;
+                    $object->email = $transaction->EMAIL;
+                    $object->details = $backup_domain . "/contents/?path=finance/paypal/view&id=" . $transactionID . "&domain=" . get_domain();
+                    $object->country = code_to_country($transaction->COUNTRYCODE);
 
-                        $object = new stdClass();
-                        $object->date = $date;
-                        $object->amount = $beforeTax . " " . $currency;
-                        $object->name = $transaction->FIRSTNAME . " " . $transaction->LASTNAME;
-                        $object->email = $transaction->EMAIL;
-                        $object->details = get_domain() . "/contents/?path=paypal/view&id=" . $transactionID;
-                        $object->country = code_to_country($transaction->COUNTRYCODE);
+                    if (!in_array($transactionID, $failedTransactions)) {
+                        if ($paypalBusinessEmail) {
+                            $actual_profit += $beforeTax - $tax;
+                        } else {
+                            $actual_profit += $beforeTax;
+                        }
+                        foreach ($receivers as $receiver) {
+                            if (!array_key_exists($receiver, $results)) {
+                                $resultObject = new stdClass();
+                                $resultObject->profit_before_tax = $beforeTax;
+                                $resultObject->profit_after_tax = ($beforeTax - $tax);
+                                $resultObject->fees = $fee;
+                                $resultObject->tax = $tax;
+                                $resultObject->loss = 0.0;
 
-                        if (!in_array($transactionID, $failedTransactions)) {
-                            if (!$hasAmount || $formAmount == $beforeTax) {
-                                foreach ($receivers as $receiver) {
-                                    if (!array_key_exists($receiver, $results)) {
-                                        $resultObject = new stdClass();
-                                        $resultObject->profit_before_tax = $beforeTax;
-                                        $resultObject->profit_after_tax = ($beforeTax - $tax);
-                                        $resultObject->fees = $fee;
-                                        $resultObject->tax = $tax;
-                                        $resultObject->loss = 0.0;
+                                if ($receiver != $totalString) {
+                                    $array = array();
+                                    $array[strtotime($date)] = $object;
+                                    $resultObject->succesful_transactions = $array;
+                                    $resultObject->failed_transactions = array();
+                                }
+                                $results[$receiver] = $resultObject;
+                            } else {
+                                $resultObject = $results[$receiver];
+                                $resultObject->profit_before_tax += $beforeTax;
+                                $resultObject->profit_after_tax += ($beforeTax - $tax);
+                                $resultObject->fees += $fee;
+                                $resultObject->tax += $tax;
 
-                                        if ($receiver != $totalString) {
-                                            $array = array();
-                                            $array[strtotime($date)] = $object;
-                                            $resultObject->succesful_transactions = $array;
-                                            $resultObject->failed_transactions = array();
-                                        }
-                                        $results[$receiver] = $resultObject;
-                                    } else {
-                                        $resultObject = $results[$receiver];
-                                        $resultObject->profit_before_tax += $beforeTax;
-                                        $resultObject->profit_after_tax += ($beforeTax - $tax);
-                                        $resultObject->fees += $fee;
-                                        $resultObject->tax += $tax;
-
-                                        if ($receiver != $totalString) {
-                                            $resultObject->succesful_transactions[strtotime($date)] = $object;
-                                            ksort($resultObject->succesful_transactions);
-                                        }
-                                    }
+                                if ($receiver != $totalString) {
+                                    $resultObject->succesful_transactions[strtotime($date)] = $object;
+                                    ksort($resultObject->succesful_transactions);
                                 }
                             }
-                        } else {
-                            foreach ($receivers as $receiver) {
-                                if (!array_key_exists($receiver, $results)) {
-                                    $resultObject = new stdClass();
-                                    $resultObject->profit_before_tax = 0;
-                                    $resultObject->profit_after_tax = 0;
-                                    $resultObject->fees = 0;
-                                    $resultObject->tax = 0;
-                                    $resultObject->loss = $beforeTax;
+                        }
+                    } else {
+                        foreach ($receivers as $receiver) {
+                            if (!array_key_exists($receiver, $results)) {
+                                $resultObject = new stdClass();
+                                $resultObject->profit_before_tax = 0;
+                                $resultObject->profit_after_tax = 0;
+                                $resultObject->fees = 0;
+                                $resultObject->tax = 0;
+                                $resultObject->loss = $beforeTax;
 
-                                    if ($receiver != $totalString) {
-                                        $array = array();
-                                        $array[strtotime($date)] = $object;
-                                        $resultObject->succesful_transactions = array();
-                                        $resultObject->failed_transactions = $array;
-                                    }
-                                    $results[$receiver] = $resultObject;
-                                } else {
-                                    $resultObject = $results[$receiver];
-                                    $resultObject->loss += $beforeTax;
+                                if ($receiver != $totalString) {
+                                    $array = array();
+                                    $array[strtotime($date)] = $object;
+                                    $resultObject->succesful_transactions = array();
+                                    $resultObject->failed_transactions = $array;
+                                }
+                                $results[$receiver] = $resultObject;
+                            } else {
+                                $resultObject = $results[$receiver];
+                                $resultObject->loss += $beforeTax;
 
-                                    if ($receiver != $totalString) {
-                                        $resultObject->failed_transactions[strtotime($date)] = $object;
-                                        ksort($resultObject->failed_transactions);
-                                    }
+                                if ($receiver != $totalString) {
+                                    $resultObject->failed_transactions[strtotime($date)] = $object;
+                                    ksort($resultObject->failed_transactions);
                                 }
                             }
                         }
@@ -164,86 +158,81 @@ if (is_numeric($month) && is_numeric($year)) {
                     }
                 }
                 $date = date("Y-m-d H:i:s", $transaction->created);
-                $hasFees = isset($transaction->fee);
 
-                if ($date >= $startDate && $date <= $endDate && ($ignoreFees || $hasFees)) {
-                    $fee = $hasFees ? $transaction->fee : 0;
+                if ($date >= $startDate && $date <= $endDate) {
+                    $fee = isset($transaction->fee) ? $transaction->fee / 100.0 : 0.0;
+                    $amount = $transaction->amount / 100.0;
+                    $beforeTax = $amount - $fee;
+                    $tax = $beforeTax - ($beforeTax / $standardTax);
+                    $currency = strtoupper($transaction->currency);
+                    $receivers = array(
+                        $totalString,
+                        "stripe"
+                    );
 
-                    if ($ignoreFees || $fee != 0) {
-                        $fee = $fee / 100.0;
-                        $amount = $transaction->amount / 100.0;
-                        $beforeTax = $amount - $fee;
-                        $tax = cut_decimal($beforeTax - ($beforeTax / $standardTax), 2);
-                        $currency = strtoupper($transaction->currency);
-                        $receivers = array(
-                            $totalString,
-                            "stripe"
-                        );
+                    $object = new stdClass();
+                    $object->date = $date;
+                    $object->name = get_object_depth_key($transaction, "source.billing_details.name")[1];
+                    $object->email = get_object_depth_key($transaction, "source.billing_details.email")[1];
+                    $object->amount = $beforeTax . " " . $currency;
+                    $object->details = $backup_domain . "/contents/?path=finance/stripe/view&id=" . $transactionID . "&domain=" . get_domain();
 
-                        $object = new stdClass();
-                        $object->date = $date;
-                        $object->name = get_object_depth_key($transaction, "source.billing_details.name")[1];
-                        $object->email = get_object_depth_key($transaction, "source.billing_details.email")[1];
-                        $object->amount = $beforeTax . " " . $currency;
-                        $object->details = get_domain() . "/contents/?path=stripe/view&id=" . $transactionID;
+                    if (!in_array($transactionID, $failedTransactions)) {
+                        $actual_profit += $beforeTax;
 
-                        if (!in_array($transactionID, $failedTransactions)) {
-                            if (!$hasAmount || $formAmount == $beforeTax) {
-                                foreach ($receivers as $receiver) {
-                                    if (!array_key_exists($receiver, $results)) {
-                                        $resultObject = new stdClass();
-                                        $resultObject->profit_before_tax = $beforeTax;
-                                        $resultObject->profit_after_tax = ($beforeTax - $tax);
-                                        $resultObject->fees = $fee;
-                                        $resultObject->tax = $tax;
-                                        $resultObject->loss = 0.0;
+                        foreach ($receivers as $receiver) {
+                            if (!array_key_exists($receiver, $results)) {
+                                $resultObject = new stdClass();
+                                $resultObject->profit_before_tax = $beforeTax;
+                                $resultObject->profit_after_tax = ($beforeTax - $tax);
+                                $resultObject->fees = $fee;
+                                $resultObject->tax = $tax;
+                                $resultObject->loss = 0.0;
 
-                                        if ($receiver != $totalString) {
-                                            $array = array();
-                                            $array[strtotime($date)] = $object;
-                                            $resultObject->succesful_transactions = $array;
-                                            $resultObject->failed_transactions = array();
-                                        }
-                                        $results[$receiver] = $resultObject;
-                                    } else {
-                                        $resultObject = $results[$receiver];
-                                        $resultObject->profit_before_tax += $beforeTax;
-                                        $resultObject->profit_after_tax += ($beforeTax - $tax);
-                                        $resultObject->fees += $fee;
-                                        $resultObject->tax += $tax;
+                                if ($receiver != $totalString) {
+                                    $array = array();
+                                    $array[strtotime($date)] = $object;
+                                    $resultObject->succesful_transactions = $array;
+                                    $resultObject->failed_transactions = array();
+                                }
+                                $results[$receiver] = $resultObject;
+                            } else {
+                                $resultObject = $results[$receiver];
+                                $resultObject->profit_before_tax += $beforeTax;
+                                $resultObject->profit_after_tax += ($beforeTax - $tax);
+                                $resultObject->fees += $fee;
+                                $resultObject->tax += $tax;
 
-                                        if ($receiver != $totalString) {
-                                            $resultObject->succesful_transactions[strtotime($date)] = $object;
-                                            ksort($resultObject->succesful_transactions);
-                                        }
-                                    }
+                                if ($receiver != $totalString) {
+                                    $resultObject->succesful_transactions[strtotime($date)] = $object;
+                                    ksort($resultObject->succesful_transactions);
                                 }
                             }
-                        } else {
-                            foreach ($receivers as $receiver) {
-                                if (!array_key_exists($receiver, $results)) {
-                                    $resultObject = new stdClass();
-                                    $resultObject->profit_before_tax = 0;
-                                    $resultObject->profit_after_tax = 0;
-                                    $resultObject->fees = 0;
-                                    $resultObject->tax = 0;
-                                    $resultObject->loss = $beforeTax;
+                        }
+                    } else {
+                        foreach ($receivers as $receiver) {
+                            if (!array_key_exists($receiver, $results)) {
+                                $resultObject = new stdClass();
+                                $resultObject->profit_before_tax = 0;
+                                $resultObject->profit_after_tax = 0;
+                                $resultObject->fees = 0;
+                                $resultObject->tax = 0;
+                                $resultObject->loss = $beforeTax;
 
-                                    if ($receiver != $totalString) {
-                                        $array = array();
-                                        $array[strtotime($date)] = $object;
-                                        $resultObject->succesful_transactions = array();
-                                        $resultObject->failed_transactions = $array;
-                                    }
-                                    $results[$receiver] = $resultObject;
-                                } else {
-                                    $resultObject = $results[$receiver];
-                                    $resultObject->loss += $beforeTax;
+                                if ($receiver != $totalString) {
+                                    $array = array();
+                                    $array[strtotime($date)] = $object;
+                                    $resultObject->succesful_transactions = array();
+                                    $resultObject->failed_transactions = $array;
+                                }
+                                $results[$receiver] = $resultObject;
+                            } else {
+                                $resultObject = $results[$receiver];
+                                $resultObject->loss += $beforeTax;
 
-                                    if ($receiver != $totalString) {
-                                        $resultObject->failed_transactions[strtotime($date)] = $object;
-                                        ksort($resultObject->failed_transactions);
-                                    }
+                                if ($receiver != $totalString) {
+                                    $resultObject->failed_transactions[strtotime($date)] = $object;
+                                    ksort($resultObject->failed_transactions);
                                 }
                             }
                         }
@@ -261,7 +250,7 @@ if (is_numeric($month) && is_numeric($year)) {
                 $totalString,
                 "builtbybit"
             );
-            $fee = 0.0;
+            $feePercentage = 0.05;
             $currency = "USD";
 
             foreach ($products->getObject() as $product) {
@@ -271,8 +260,9 @@ if (is_numeric($month) && is_numeric($year)) {
                         $product->identification[AccountAccounts::BUILTBYBIT_URL],
                     );
                     $amount = array_shift($product->tiers->paid)->price;
+                    $fee = $amount * $feePercentage;
                     $beforeTax = $amount - $fee;
-                    $tax = cut_decimal($beforeTax - ($beforeTax / $standardTax), 2);
+                    $tax = $beforeTax - ($beforeTax / $standardTax);
 
                     foreach ($ownerships as $ownership) {
                         $date = $ownership->creation_date;
@@ -284,12 +274,14 @@ if (is_numeric($month) && is_numeric($year)) {
 
                         if ($ownership->creation_date >= $startDate
                             && $ownership->creation_date <= $endDate) {
+                            $actual_profit += $beforeTax;
+
                             foreach ($receivers as $receiver) {
                                 if (!array_key_exists($receiver, $results)) {
                                     $resultObject = new stdClass();
                                     $resultObject->profit_before_tax = $beforeTax;
                                     $resultObject->profit_after_tax = ($beforeTax - $tax);
-                                    $resultObject->fees = 0.0;
+                                    $resultObject->fees = $fee;
                                     $resultObject->tax = $tax;
 
                                     if ($receiver != $totalString) {
@@ -325,7 +317,10 @@ if (is_numeric($month) && is_numeric($year)) {
                 $totalString,
                 "patreon"
             );
-            $feePercentage = 0.08; // Patreon Fee
+            $patreonFee = 0.08;
+            $paymentFee = 0.029;
+            $feePercentage = $patreonFee + $paymentFee;
+            $feeAmount = 0.3;
             $currency = "EUR";
 
             foreach ($patreon as $patron) {
@@ -333,14 +328,16 @@ if (is_numeric($month) && is_numeric($year)) {
 
                 if ($date !== null) {
                     $amount = $patron->attributes->currently_entitled_amount_cents / 100.0;
-                    $fee = $amount * $feePercentage;
+                    $fee = ($amount * $feePercentage) + $feeAmount;
                     $beforeTax = $amount - $fee;
-                    $tax = cut_decimal($beforeTax - ($beforeTax / $standardTax), 2);
+                    $tax = $beforeTax - ($beforeTax / $standardTax);
 
                     $object = new stdClass();
                     $object->user = $patron->attributes->full_name;
                     $object->date = $date;
                     $object->amount = $beforeTax . " " . $currency;
+
+                    $actual_profit += $beforeTax;
 
                     foreach ($receivers as $receiver) {
                         if (!array_key_exists($receiver, $results)) {
@@ -374,6 +371,7 @@ if (is_numeric($month) && is_numeric($year)) {
         }
 
         if (!empty($results)) {
+            $results[$totalString]->actual_profit = $actual_profit;
             header('Content-type: Application/JSON');
             echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         } else {
