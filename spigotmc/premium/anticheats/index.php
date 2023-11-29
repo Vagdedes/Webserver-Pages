@@ -184,7 +184,7 @@
                         foreach (explode(" ", $data[1]) as $word) {
                             $length = strlen($word);
 
-                            if ($length >= 2 && ($length >= 5 || is_alpha_numeric($word)) && strpos(strtolower($word), "inactive") === false) {
+                            if ($length >= 2 && ($length >= 5 || is_alpha_numeric($word)) && !str_contains(strtolower($word), "inactive")) {
                                 $title = $word;
                                 break;
                             }
