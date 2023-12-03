@@ -7,7 +7,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
 <html lang='en'>
 <head>
     <?php echo get_google_analytics(); ?>
-    <title>Evangelos Dedes | Software Developer</title>
+    <title>Evangelos Dedes | Software Engineer</title>
     <?php echo "<meta name='description' content='" . $description . "'>"; ?>
     <?php echo "<link rel='shortcut icon' type='image/png' href='" . Account::IMAGES_PATH . "icon.png'>"; ?>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
