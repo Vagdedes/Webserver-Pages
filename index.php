@@ -26,7 +26,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
         Evangelos Dedes
     </div>
     <div class='area_text'>
-        Software Developer
+        Software Engineer
     </div>
 </div>
 
