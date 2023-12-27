@@ -58,7 +58,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
                 </a>
             </li>
             <li>
-                <a href='https://vagdedes.com/discord'>
+                <a href='https://www.vagdedes.com/discord'>
                     <div class='product_list_contents'
                          style="background-image: url('https://vagdedes.com/.images/discord.png');">
                         <div class='product_list_title'>Discord</div>
@@ -66,7 +66,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
                 </a>
             </li>
             <li id="left">
-                <a href='https://vagdedes.com/resume'>
+                <a href='https://www.vagdedes.com/resume'>
                     <div class='product_list_contents'
                          style="background-image: url('https://vagdedes.com/.images/simple.png');">
                         <div class='product_list_title'>Resume</div>
