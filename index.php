@@ -80,7 +80,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
 <div class="footer">
     <div class="footer_center">
         <div class="footer_top">
-            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfTrwwKYw0npNxBkuxuHzu9WnD0xwzbSf09FA6XbAMVGcHFJw/viewform" class="selection" id="hover">CONTACT ME</a>
+            <a href="https://www.idealistic.ai/account/profile/contact" class="selection" id="hover">CONTACT ME</a>
         </div>
         <div class="footer_bottom">
             @<?php echo date("Y") . " Vagdedes.com"; ?>

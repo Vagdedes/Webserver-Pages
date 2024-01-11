@@ -1,4 +1,2 @@
 <?php
-require '/var/www/.structure/library/base/utilities.php';
-redirect_to_url("https://www.patreon.com/Vagdedes");
-exit();
+require '/var/www/idealistic/patreon/index.php';
