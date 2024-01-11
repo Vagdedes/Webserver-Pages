@@ -34,7 +34,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
     <div class='product_list'>
         <ul>
             <li id="left">
-                <a href='https://github.com/Vagdedes'>
+                <a href='https://www.vagdedes.com/github'>
                     <div class='product_list_contents'
                          style="background-image: url('https://vagdedes.com/.images/github.png');">
                         <div class='product_list_title'>GitHub</div>
@@ -42,7 +42,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
                 </a>
             </li>
             <li>
-                <a href='https://www.linkedin.com/in/Vagdedes/'>
+                <a href='https://www.vagdedes.com/linkedin'>
                     <div class='product_list_contents'
                          style="background-image: url('https://vagdedes.com/.images/linkedin.png');">
                         <div class='product_list_title'>LinkedIn</div>
@@ -50,7 +50,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
                 </a>
             </li>
             <li id="left">
-                <a href='https://www.patreon.com/Vagdedes'>
+                <a href='https://www.idealistic.ai/patreon'>
                     <div class='product_list_contents'
                          style="background-image: url('https://vagdedes.com/.images/patreon.png');">
                         <div class='product_list_title'>Patreon</div>
@@ -58,7 +58,7 @@ $description = "Welcome to my personal website. Here you will find my related pr
                 </a>
             </li>
             <li>
-                <a href='https://www.vagdedes.com/discord'>
+                <a href='https://www.idealistic.ai/discord'>
                     <div class='product_list_contents'
                          style="background-image: url('https://vagdedes.com/.images/discord.png');">
                         <div class='product_list_title'>Discord</div>
