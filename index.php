@@ -49,14 +49,6 @@ $description = "Welcome to my personal website. Here you will find my related pr
                     </div>
                 </a>
             </li>
-            <li id="left">
-                <a href='https://www.idealistic.ai/patreon'>
-                    <div class='product_list_contents'
-                         style="background-image: url('https://vagdedes.com/.images/patreon.png');">
-                        <div class='product_list_title'>Patreon</div>
-                    </div>
-                </a>
-            </li>
             <li>
                 <a href='https://www.idealistic.ai/discord'>
                     <div class='product_list_contents'
