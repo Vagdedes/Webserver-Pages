@@ -53,6 +53,10 @@
 	background: transparent;
 }
 
+.area_logo#circular img {
+    border-radius: 50%;
+}
+
 .area_logo div {
 	transition: transform .33s;
 }
