@@ -13,6 +13,7 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
         require '/var/www/.structure/library/paypal/init.php';
         $table = "personal.expenses";
         $cacheKey = $table . $month . $year;
+        $maxAccounts = 2;
 
         // Separator
 
@@ -37,7 +38,9 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
                 }
 
                 if ($continue) {
-                    clear_memory(array($cacheKey), true);
+                    clear_memory(array($cacheKey), true, $maxAccounts, function ($value) {
+                        return is_array($value);
+                    });
                     sql_insert(
                         $table,
                         array(
@@ -56,7 +59,7 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
             if ($array === null) {
                 $array = array();
 
-                for ($x = 0; $x < 2; $x++) {
+                for ($x = 0; $x < $maxAccounts; $x++) {
                     $business = $x == 0;
                     $cacheKey = $table . $month . $year . $business;
 
