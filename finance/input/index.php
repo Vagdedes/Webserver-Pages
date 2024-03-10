@@ -45,7 +45,7 @@ if (is_numeric($month) && is_numeric($year)) {
         $transactions = get_all_paypal_transactions(0, $startDate);
 
         if (!empty($transactions)) {
-            $failedTransactions = get_failed_paypal_transactions(null, 0, $startDate);
+            $failedTransactions = get_failed_paypal_transactions(0, $startDate);
 
             foreach ($transactions as $transactionID => $transaction) {
                 foreach ($blacklist as $blacklisted) {
