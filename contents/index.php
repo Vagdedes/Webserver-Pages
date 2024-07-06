@@ -1,2 +1,2 @@
 <?php
-require '/var/www/idealistic/contents/index.php';
+require '/var/www/.structure/library/base/tasks/contents.php';
