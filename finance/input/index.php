@@ -29,7 +29,6 @@ if (is_numeric($month) && is_numeric($year)) {
 
         // Separator
         $results = array();
-        $actual_profit = 0;
 
         // Separator
         $blacklist = get_sql_query(
@@ -78,18 +77,15 @@ if (is_numeric($month) && is_numeric($year)) {
                     $object->country = code_to_country($transaction->COUNTRYCODE);
 
                     if (!in_array($transactionID, $failedTransactions)) {
-                        if ($paypalBusinessEmail) {
-                            $actual_profit += $beforeTax - $tax;
-                        } else {
-                            $actual_profit += $beforeTax;
-                        }
                         foreach ($receivers as $receiver) {
                             if (!array_key_exists($receiver, $results)) {
                                 $resultObject = new stdClass();
                                 $resultObject->profit_before_tax = $beforeTax;
-                                $resultObject->profit_after_tax = ($beforeTax - $tax);
+                                $resultObject->profit_after_tax = $paypalBusinessEmail
+                                    ? ($beforeTax - $tax)
+                                    : $beforeTax;
                                 $resultObject->fees = $fee;
-                                $resultObject->tax = $tax;
+                                $resultObject->tax = $paypalBusinessEmail ? $tax : 0.0;
                                 $resultObject->loss = 0.0;
 
                                 if ($receiver != $totalString) {
@@ -102,10 +98,14 @@ if (is_numeric($month) && is_numeric($year)) {
                             } else {
                                 $resultObject = $results[$receiver];
                                 $resultObject->profit_before_tax += $beforeTax;
-                                $resultObject->profit_after_tax += ($beforeTax - $tax);
+                                $resultObject->profit_after_tax += $paypalBusinessEmail
+                                    ? ($beforeTax - $tax)
+                                    : $beforeTax;
                                 $resultObject->fees += $fee;
-                                $resultObject->tax += $tax;
 
+                                if ($paypalBusinessEmail) {
+                                    $resultObject->tax += $tax;
+                                }
                                 if ($receiver != $totalString) {
                                     $resultObject->succesful_transactions[strtotime($date)] = $object;
                                     ksort($resultObject->succesful_transactions);
@@ -178,15 +178,13 @@ if (is_numeric($month) && is_numeric($year)) {
                     $object->details = $backup_domain . "/contents/?path=finance/stripe/view&id=" . $transactionID . "&domain=" . get_domain();
 
                     if (!in_array($transactionID, $failedTransactions)) {
-                        $actual_profit += $beforeTax;
-
                         foreach ($receivers as $receiver) {
                             if (!array_key_exists($receiver, $results)) {
                                 $resultObject = new stdClass();
                                 $resultObject->profit_before_tax = $beforeTax;
-                                $resultObject->profit_after_tax = ($beforeTax - $tax);
+                                $resultObject->profit_after_tax = $beforeTax;
                                 $resultObject->fees = $fee;
-                                $resultObject->tax = $tax;
+                                $resultObject->tax = 0.0;
                                 $resultObject->loss = 0.0;
 
                                 if ($receiver != $totalString) {
@@ -199,9 +197,8 @@ if (is_numeric($month) && is_numeric($year)) {
                             } else {
                                 $resultObject = $results[$receiver];
                                 $resultObject->profit_before_tax += $beforeTax;
-                                $resultObject->profit_after_tax += ($beforeTax - $tax);
+                                $resultObject->profit_after_tax += $beforeTax;
                                 $resultObject->fees += $fee;
-                                $resultObject->tax += $tax;
 
                                 if ($receiver != $totalString) {
                                     $resultObject->succesful_transactions[strtotime($date)] = $object;
@@ -281,13 +278,12 @@ if (is_numeric($month) && is_numeric($year)) {
                                 && $ownership->creation_date <= $endDate
                                 && !in_array($date, $redundantDates)) {
                                 $redundantDates[] = $date;
-                                $actual_profit += $beforeTax;
 
                                 foreach ($receivers as $receiver) {
                                     if (!array_key_exists($receiver, $results)) {
                                         $resultObject = new stdClass();
                                         $resultObject->profit_before_tax = $beforeTax;
-                                        $resultObject->profit_after_tax = ($beforeTax - $tax);
+                                        $resultObject->profit_after_tax = $beforeTax;
                                         $resultObject->fees = $fee;
                                         $resultObject->tax = $tax;
 
@@ -300,9 +296,8 @@ if (is_numeric($month) && is_numeric($year)) {
                                     } else {
                                         $resultObject = $results[$receiver];
                                         $resultObject->profit_before_tax += $beforeTax;
-                                        $resultObject->profit_after_tax += ($beforeTax - $tax);
+                                        $resultObject->profit_after_tax += $beforeTax;
                                         $resultObject->fees += $fee;
-                                        $resultObject->tax += $tax;
 
                                         if ($receiver != $totalString) {
                                             $resultObject->succesful_transactions[strtotime($date)] = $object;
@@ -345,15 +340,13 @@ if (is_numeric($month) && is_numeric($year)) {
                     $object->date = $date;
                     $object->amount = $beforeTax . " " . $currency;
 
-                    $actual_profit += $beforeTax;
-
                     foreach ($receivers as $receiver) {
                         if (!array_key_exists($receiver, $results)) {
                             $resultObject = new stdClass();
                             $resultObject->profit_before_tax = $beforeTax;
-                            $resultObject->profit_after_tax = ($beforeTax - $tax);
+                            $resultObject->profit_after_tax = $beforeTax;
                             $resultObject->fees = 0.0;
-                            $resultObject->tax = $tax;
+                            $resultObject->tax = 0.0;
 
                             if ($receiver != $totalString) {
                                 $array = array();
@@ -364,9 +357,8 @@ if (is_numeric($month) && is_numeric($year)) {
                         } else {
                             $resultObject = $results[$receiver];
                             $resultObject->profit_before_tax += $beforeTax;
-                            $resultObject->profit_after_tax += ($beforeTax - $tax);
+                            $resultObject->profit_after_tax += $beforeTax;
                             $resultObject->fees += $fee;
-                            $resultObject->tax += $tax;
 
                             if ($receiver != $totalString) {
                                 $resultObject->succesful_transactions[strtotime($date)] = $object;
@@ -379,7 +371,6 @@ if (is_numeric($month) && is_numeric($year)) {
         }
 
         if (!empty($results)) {
-            $results[$totalString]->actual_profit = $actual_profit;
             header('Content-type: Application/JSON');
             echo json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         } else {
