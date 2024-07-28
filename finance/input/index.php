@@ -5,12 +5,9 @@ $year = get_form_get("year");
 
 
 if (is_numeric($month) && is_numeric($year)) {
-    require '/var/www/.structure/library/base/communication.php';
+    require '/var/www/.structure/library/base/requirements/account_systems.php';
 
     if (is_private_connection()) {
-        require '/var/www/.structure/library/base/requirements/account_systems.php';
-
-        // Separator
         $standardTax = 1.24;
         $monthString = ($month < 10 ? "0" . $month : $month);
         $previousMonth = $monthString - 1;

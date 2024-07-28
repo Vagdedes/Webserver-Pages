@@ -39,7 +39,7 @@
         <ul>
             <?php
             require '/var/www/.structure/library/base/form.php';
-            require '/var/www/.structure/library/base/requirements/sql_connection.php';
+            require_once '/var/www/.structure/library/base/communication.php';
 
             // Separator
             function ceilRating($decimal)
