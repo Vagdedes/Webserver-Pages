@@ -52,11 +52,15 @@
 
             // Separator
             $anticheats = array();
-            $query = sql_query("SELECT * FROM anticheat.spigotmc_premium_anticheats;");
+            set_sql_cache();
+            $query = get_sql_query(
+                "anticheat.spigotmc_premium_anticheats",
+                array("resource_id")
+            );
 
-            if (isset($query->num_rows) && $query->num_rows > 0) {
-                while ($row = $query->fetch_assoc()) {
-                    $anticheats[] = $row["resource_id"];
+            if (!empty($query)) {
+                foreach ($query as $row) {
+                    $anticheats[] = $row->resource_id;
                 }
             }
 
@@ -66,31 +70,51 @@
             $downloadsTrackingTable = "anticheat.spigotmc_downloads_tracking";
 
             foreach ($anticheats as $anticheat) {
-                $contents = timed_file_get_contents("https://api.spigotmc.org/simple/0.2/index.php?action=getResource&id=" . $anticheat, 3);
-                $json = $contents === false ? null : json_decode($contents);
+                $url = "https://api.spigotmc.org/simple/0.2/index.php?action=getResource&id=" . $anticheat;
+                $urlKey = string_to_integer($url);
+                $contents = get_key_value_pair($urlKey);
 
-                if ($json != null && is_object($json)) {
-                    $stats = $json->{"stats"};
-                    $premium = $json->{"premium"};
+                if (!is_object($contents)) {
+                    $contents = timed_file_get_contents($url, 3);
+
+                    if ($contents === false) {
+                        $contents = null;
+                    } else {
+                        $contents = json_decode($contents, false);
+                        set_key_value_pair($urlKey, $contents, "1 hour");
+                    }
+                }
+
+                if (is_object($contents)) {
+                    $stats = $contents->{"stats"};
+                    $premium = $contents->{"premium"};
                     $downloads = $stats->{"downloads"};
                     $ratingsCount = $stats->{"reviews"}->{"unique"};
                     $averageRating = $stats->{"rating"};
-                    //$averageRating = ($anticheat == 25638 ? ceilRating($averageRating) : $averageRating);
 
-                    $realRating = (10 * 3 + $averageRating * $ratingsCount) / (10 + $ratingsCount);
                     $averageRating = (10 * 3 + $averageRating * $ratingsCount) / (10 + $ratingsCount);
+                    $keyRating = (string)($averageRating * pow(10, 10));
 
                     $price = $premium->{"price"};
                     $currency = strtoupper($premium->{"currency"});
 
-                    $key = (string)($realRating * 100000000);
-                    $identification[$key] = array($anticheat, $json->{"title"}, $downloads, $averageRating, $ratingsCount, $price, $currency);
-                    $order[] = $key;
+                    $identification[$keyRating] = array($anticheat, $contents->{"title"}, $downloads, $averageRating, $ratingsCount, $price, $currency);
+                    $order[] = $keyRating;
 
                     // Separator
-                    $downloadsTrackingQuery = sql_query("SELECT * FROM $downloadsTrackingTable WHERE resource_id = '$anticheat' AND downloads = '$downloads';");
+                    set_sql_cache();
+                    $downloadsTrackingQuery = get_sql_query(
+                        $downloadsTrackingTable,
+                        array("resource_id"),
+                        array(
+                            array("resource_id", $anticheat),
+                            array("downloads", $downloads)
+                        ),
+                        null,
+                        1
+                    );
 
-                    if (!isset($downloadsTrackingQuery->num_rows) || $downloadsTrackingQuery->num_rows == 0) {
+                    if (empty($downloadsTrackingQuery)) {
                         sql_insert(
                             $downloadsTrackingTable,
                             array(
@@ -117,9 +141,16 @@
                 && is_private_connection();
 
             if ($showSales) {
-                $query = sql_query("SELECT * FROM $downloadsTrackingTable;");
+                set_sql_cache();
+                $query = get_sql_query(
+                    $downloadsTrackingTable,
+                    array("resource_id", "downloads"),
+                    array(
+                        array("date", get_current_date())
+                    )
+                );
 
-                if (isset($query->num_rows) && $query->num_rows > 0) {
+                if (!empty($query)) {
                     $min = array();
                     $max = array();
                     $lastMonth = $month == 1;
@@ -127,15 +158,15 @@
                     $previousOrCurrentYear = $lastMonth ? ($year - 1) : $year;
                     $previousMonthDays = cal_days_in_month(CAL_GREGORIAN, $previousMonth, $previousOrCurrentYear);
 
-                    while ($row = $query->fetch_assoc()) {
-                        $date = explode("-", $row["date"]);
+                   foreach ($query as $row){
+                        $date = explode("-", $row->date);
                         $loopYear = $date[0];
                         $loopMonth = $date[1];
                         $loopDay = substr($date[2], 0, 2);
 
                         if ($loopYear == $year && $loopMonth == $month || $loopYear == $previousOrCurrentYear && $loopMonth == $previousMonth && $loopDay == $previousMonthDays) {
-                            $resource_id = $row["resource_id"];
-                            $downloads = $row["downloads"];
+                            $resource_id = $row->resource_id;
+                            $downloads = $row->downloads;
 
                             if ($downloads != null) {
                                 if (!array_key_exists($resource_id, $min)) {
@@ -160,12 +191,12 @@
             if (!empty($order)) {
                 $success = false;
 
-                foreach ($order as $position => $realRating) {
+                foreach ($order as $position => $keyRating) {
                     $position = "<b>" . add_ordinal_number($position + 1) . "</b>";
+                    $data = $identification[$keyRating] ?? null;
 
-                    if (array_key_exists($realRating, $identification)) {
+                    if ($data !== null) {
                         $success = true;
-                        $data = $identification[$realRating];
                         $id = $data[0];
 
                         // Separator
