@@ -112,7 +112,6 @@
             $month = get_form_get("month");
             $sales = array();
 
-            require '/var/www/.structure/library/base/communication.php';
             $showSales = is_numeric($year) && is_numeric($month)
                 && $month >= 1 && $month <= 12
                 && is_private_connection();
