@@ -52,7 +52,6 @@
 
             // Separator
             $anticheats = array();
-            set_sql_cache();
             $query = get_sql_query(
                 "anticheat.spigotmc_premium_anticheats",
                 array("resource_id")
@@ -102,7 +101,6 @@
                     $order[] = $keyRating;
 
                     // Separator
-                    set_sql_cache();
                     $downloadsTrackingQuery = get_sql_query(
                         $downloadsTrackingTable,
                         array("resource_id"),
@@ -141,7 +139,6 @@
                 && is_private_connection();
 
             if ($showSales) {
-                set_sql_cache();
                 $query = get_sql_query(
                     $downloadsTrackingTable,
                     array("resource_id", "downloads"),

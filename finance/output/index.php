@@ -47,9 +47,6 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
                 }
 
                 if ($continue) {
-                    clear_memory(array($cacheKey), true, $maxAccounts, function ($value) {
-                        return is_array($value);
-                    });
                     sql_insert(
                         $table,
                         array(
@@ -126,7 +123,6 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
                 }
 
                 // Separator
-                set_sql_cache($table);
                 $query = get_sql_query(
                     $table,
                     array("transaction_name", "transaction_date", "amount"),
