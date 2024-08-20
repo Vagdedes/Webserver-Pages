@@ -23,14 +23,23 @@ if (is_numeric($month) && is_numeric($year) && $month >= 1 && $month <= 12) {
 
             if (!empty($formName) && is_numeric($formAmount)) {
                 $currentDate = date("Y-m-d H:i:s");
-                $query = sql_query("SELECT amount, transaction_date FROM $table WHERE transaction_name = '$formName' AND month = '$month' AND year = '$year';");
+                $query = get_sql_query(
+                    $table,
+                    array("amount", "transaction_date"),
+                    array(
+                        array("transaction_name", $formName),
+                        array("month", $month),
+                        array("year", $year)
+                    )
+                );
                 $continue = true;
 
-                if (isset($query->num_rows) && $query->num_rows > 0) {
-                    while ($row = $query->fetch_assoc()) {
-                        $loopDate = $row["transaction_date"];
+                if (!empty($query)) {
+                    foreach ($query as $row) {
+                        $loopDate = $row->transaction_date;
 
-                        if ($row["amount"] == $formAmount || abs(strtotime($currentDate) - strtotime($loopDate)) > 300) {
+                        if ($row->amount == $formAmount
+                            || abs(strtotime($currentDate) - strtotime($loopDate)) > 300) {
                             $continue = false;
                             break;
                         }
