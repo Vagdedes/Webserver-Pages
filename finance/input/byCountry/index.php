@@ -12,8 +12,9 @@ if (is_numeric($month) && is_numeric($year)) {
         if ($text !== false) {
             $json = json_decode($text, true);
             $array = array();
+            $key = get_form_get("key");
 
-            foreach ($json["paypal:VagdedesBilling@gmail.com"]["succesful_transactions"] as $value) {
+            foreach (($json[$key]["succesful_transactions"] ?? array()) as $value) {
                 $country = $value["country"];
                 unset($value["country"]);
 
